@@ -1,61 +1,55 @@
 class Point {
 	
-    x: number;
-    y: number;
-    z: number;
-    
-    constructor (x: number, y: number, z: number) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
+	x:number;
+	y:number;
+	
+	constructor (x:number, y:number) {
+		this.x = x;
+		this.y = y;
+	}
 
-    static distance (a: Point, b: Point) {
-        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2));
-    }
+	static distance (a:Point, b:Point) {
+		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+	}
 
-    static add (p: Point, v:Vector) {
-        return new Point(
-                p.x + v.x,
-                p.y + v.y,
-                p.z + v.z
-            );
-    }
+	static add (p:Point, v:Vector) {
+		return new Point(
+				p.x + v.x,
+				p.y + v.y
+			);
+	}
 
-    distanceTo (b: Point) {
-        return Point.distance(this, b);
-    }
+	distanceTo (b:Point) {
+		return Point.distance(this, b);
+	}
 
-    add (v: Vector) {
-        let p = Point.add(this, v);
-        this.moveTo(p);
-    }
+	add (v:Vector) {
+		let p = Point.add(this, v);
+		this.moveTo(p);
+	}
 
-    moveTo (p: Point) {
-        this.x = p.x;
-        this.y = p.y;
-        this.z = p.z;
-    }
+	moveTo (p:Point) {
+		this.x = p.x;
+		this.y = p.y;
+	}
 
-    moveToward (p: Point, s: number) {
-        let d = this.distanceTo(p);
-        console.log('d: ', d);
-        if (d > 0) {
-            let r = s / d,
-                dx = p.x - this.x,
-                dy = p.y - this.y,
-                dz = p.z - this.z,
-                np = new Point(
-                        dx * r,
-                        dy * r,
-                        dz * r
-                    );
+	moveToward (p:Point, s:number) {
+		let d = this.distanceTo(p);
 
-            this.moveTo(np);
-        } else {
-            console.log(' ! moving toward same point');
-        }
-    }
+		if (d > 0) {
+			let r = s / d,
+				dx = p.x - this.x,
+				dy = p.y - this.y,
+				v = new Vector(
+					dx * r,
+					dy * r
+				);
+
+			this.add(v);
+		} else {
+			console.log(' ! moving toward same point');
+		}
+	}
 
 }
 
@@ -68,75 +62,103 @@ class Point {
 
 class Vector extends Point {
 
-    constructor (x: number, y: number, z: number) {         
-        super(x,y,z);
-        Vector.not = new Point(0,0,0);
-    }
+	constructor (x:number, y:number) {
+		super(x,y);
+		Vector.not = new Point(0,0);
+	}
 
-    static not: Point;
+	static not:Point;
 
-    magnitude () {
-        return (Vector.not).distanceTo(this);
-    }
+	static add (a:Vector, b:Vector) {
+		return new Vector(
+				a.x + b.x,
+				a.y + b.y
+			);
+	}
+
+	magnitude () {
+		return (Vector.not).distanceTo(this);
+	}
+
+	add (v:Vector) {
+		let p = Vector.add(this, v);
+		this.moveTo(p);
+	}
+
+	angle () {
+		return Math.atan2(this.y, this.x) * 180 / Math.PI + 180;
+	}
 
 }
 
-var v = new Vector(3,4,7);
-
-console.log(v.magnitude());
 
 
 
 
 class Thing {
-    
-    mom: Vector;
-    pos: Point;
+	
+	pos:Point;
+	mom:Vector;
 
-    constructor (p: Point, v: Vector) {
-        this.pos = p;
-        this.mom = v;
-    }
+	constructor (p:Point, v:Vector) {
+		this.pos = p;
+		this.mom = v;
+	}
 
-    applyMomentum () {
-        this.pos.add(this.mom);
-    }
+	applyMomentum () {
+		this.pos.add(this.mom);
+	}
 
 }
+
+
+
 
 
 class Ship extends Thing {
 
-    rot: number;
+	rot:number;
 
-    constructor (p: Point) {
-        super(p, new Vector(0,0,0));
-        this.rot = 0;
-    }
+	constructor (p:Point) {
+		super(new Point(p.x, p.y), new Vector(0, 0));
+		this.rot = 0;
+	}
 
 }
+
+
 
 
 
 class LazerBeam extends Thing {
 
-    constructor (ship: Ship) {
-        super(ship.pos, ship.mom);
-    }
+	constructor (ship: Ship) {
+		super(ship.pos, ship.mom);
+	}
 
 }
 
 
 
 
-let a: Point = new Point(0, 0, 0),
-    b: Point = new Point(30, 40, 0);
 
-var ship: Ship = new Ship(a);
+console.log('==============');
+
+
+
+
+let a:Point = new Point(0, 0);
+let b:Point = new Point(30, 40);
+
+let ship:Ship = new Ship(a);
 
 console.log(ship);
 
-for (var i=0; i<5; i++) {
-    ship.pos.moveToward(b, 5);
-    console.log(ship.pos);
+console.log('------------');
+console.log('ship.pos: ', ship.pos);
+
+for (var i=0; i<20; i++) {
+	var d = Point.distance(ship.pos, b);
+	ship.pos.moveToward(b, Math.min(3, d));
+	console.log('ship.pos: ', ship.pos);
 }

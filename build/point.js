@@ -9,16 +9,15 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 var Point = (function () {
-    function Point(x, y, z) {
+    function Point(x, y) {
         this.x = x;
         this.y = y;
-        this.z = z;
     }
     Point.distance = function (a, b) {
-        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2));
+        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
     };
     Point.add = function (p, v) {
-        return new Point(p.x + v.x, p.y + v.y, p.z + v.z);
+        return new Point(p.x + v.x, p.y + v.y);
     };
     Point.prototype.distanceTo = function (b) {
         return Point.distance(this, b);
@@ -30,14 +29,12 @@ var Point = (function () {
     Point.prototype.moveTo = function (p) {
         this.x = p.x;
         this.y = p.y;
-        this.z = p.z;
     };
     Point.prototype.moveToward = function (p, s) {
         var d = this.distanceTo(p);
-        console.log('d: ', d);
         if (d > 0) {
-            var r = s / d, dx = p.x - this.x, dy = p.y - this.y, dz = p.z - this.z, np = new Point(dx * r, dy * r, dz * r);
-            this.moveTo(np);
+            var r = s / d, dx = p.x - this.x, dy = p.y - this.y, v = new Vector(dx * r, dy * r);
+            this.add(v);
         }
         else {
             console.log(' ! moving toward same point');
@@ -47,18 +44,26 @@ var Point = (function () {
 }());
 var Vector = (function (_super) {
     __extends(Vector, _super);
-    function Vector(x, y, z) {
-        var _this = _super.call(this, x, y, z) || this;
-        Vector.not = new Point(0, 0, 0);
+    function Vector(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        Vector.not = new Point(0, 0);
         return _this;
     }
+    Vector.add = function (a, b) {
+        return new Vector(a.x + b.x, a.y + b.y);
+    };
     Vector.prototype.magnitude = function () {
         return (Vector.not).distanceTo(this);
     };
+    Vector.prototype.add = function (v) {
+        var p = Vector.add(this, v);
+        this.moveTo(p);
+    };
+    Vector.prototype.angle = function () {
+        return Math.atan2(this.y, this.x) * 180 / Math.PI + 180;
+    };
     return Vector;
 }(Point));
-var v = new Vector(3, 4, 7);
-console.log(v.magnitude());
 var Thing = (function () {
     function Thing(p, v) {
         this.pos = p;
@@ -72,7 +77,7 @@ var Thing = (function () {
 var Ship = (function (_super) {
     __extends(Ship, _super);
     function Ship(p) {
-        var _this = _super.call(this, p, new Vector(0, 0, 0)) || this;
+        var _this = _super.call(this, new Point(p.x, p.y), new Vector(0, 0)) || this;
         _this.rot = 0;
         return _this;
     }
@@ -85,11 +90,16 @@ var LazerBeam = (function (_super) {
     }
     return LazerBeam;
 }(Thing));
-var a = new Point(0, 0, 0), b = new Point(30, 40, 0);
+console.log('==============');
+var a = new Point(0, 0);
+var b = new Point(30, 40);
 var ship = new Ship(a);
 console.log(ship);
-for (var i = 0; i < 5; i++) {
-    ship.pos.moveToward(b, 5);
-    console.log(ship.pos);
+console.log('------------');
+console.log('ship.pos: ', ship.pos);
+for (var i = 0; i < 20; i++) {
+    var d = Point.distance(ship.pos, b);
+    ship.pos.moveToward(b, Math.min(3, d));
+    console.log('ship.pos: ', ship.pos);
 }
 //# sourceMappingURL=point.js.map
