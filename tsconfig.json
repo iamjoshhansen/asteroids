@@ -1,12 +1,21 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
-        "noImplicitAny": false,
-        "outDir": "./build/",
-        "sourceMap": true
-    },
-    "files": [
-        "./src/point.ts"
-    ]
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es5",
+		"noImplicitAny": false,
+		"outDir": "./src/js/",
+		"sourceMap": true
+	},
+	"files": [
+		"./src/ts/point.ts",
+		"./src/ts/vector.ts",
+		"./src/ts/rotation.ts",
+		"./src/ts/thing.ts",
+		"./src/ts/ship.ts",
+		"./src/ts/lazer-beam.ts",
+		"./src/ts/asteroids.ts",
+		"./src/ts/render-handlers.ts",
+		"./src/ts/gamepad.ts",
+		"./src/ts/animation.ts"
+	]
 }
