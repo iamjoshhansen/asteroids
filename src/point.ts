@@ -162,3 +162,5 @@ for (var i=0; i<20; i++) {
 	ship.pos.moveToward(b, Math.min(3, d));
 	console.log('ship.pos: ', ship.pos);
 }
+
+console.log('Done!');
