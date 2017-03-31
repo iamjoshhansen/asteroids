@@ -21,15 +21,24 @@ class Vector extends Point {
 	multiply (amount:number) {
 		this.x *= amount;
 		this.y *= amount;
+		return this;
 	}
 
 	add (v:Vector) {
 		let p = Vector.add(this, v);
 		this.moveTo(p);
+		return this;
+	}
+
+	rotate (degrees:number) {
+		let new_angle = Rotation.getNormalizedVector(degrees + this.angle() + 180); // why +180 again?? why?1?
+		new_angle.multiply(this.magnitude());
+		this.moveTo(new_angle);
+		return this;
 	}
 
 	angle () {
-		return Math.atan2(this.y, this.x) * 180 / Math.PI + 180;
+		return Math.atan2(this.y, this.x) * (180 / Math.PI) + 180;
 	}
 
 }

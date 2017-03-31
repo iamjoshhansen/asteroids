@@ -15,10 +15,12 @@ var Point = (function () {
     Point.prototype.add = function (v) {
         var p = Point.add(this, v);
         this.moveTo(p);
+        return this;
     };
     Point.prototype.moveTo = function (p) {
         this.x = p.x;
         this.y = p.y;
+        return this;
     };
     Point.prototype.moveToward = function (p, s) {
         var d = this.distanceTo(p);
@@ -29,6 +31,7 @@ var Point = (function () {
         else {
             console.log(' ! moving toward same point');
         }
+        return this;
     };
     return Point;
 }());

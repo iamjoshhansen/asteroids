@@ -37,6 +37,24 @@ var render_handlers = {
 
 			// keep last
 			ctx.restore();
+		},
+
+		asteroid: function (ctx:CanvasRenderingContext2D, asteroid:Asteroid) {
+			ctx.save();
+			ctx.translate(asteroid.p.x, asteroid.p.y);
+			ctx.rotate(asteroid.r * Math.PI / 180);
+			// draw below
+
+			ctx.beginPath();
+			ctx.arc(0,0,asteroid.size, 0, Math.PI*2);
+
+			ctx.strokeStyle = '#f90';
+			ctx.fillStyle = 'rgba(200,100,0,0.25)';
+			ctx.fill();
+			ctx.stroke();
+
+			// keep last
+			ctx.restore();
 		}
 
 	};

@@ -42,28 +42,8 @@ $(window)
     }
 });
 setInterval(function () {
-    // Game logic -- NOT rendering
-    /*	Ships
-    ---------------------------*/
-    _.remove(world.ships, { active: false });
-    _.each(world.ships, function (ship) {
-        ship.applyMomentum();
-        ship.applyPositionDrag(0.99);
-        ship.applyRotationalDrag(0.999);
-        if (ship.lazer_cannon_cooldown > 0) {
-            ship.lazer_cannon_cooldown--;
-        }
-    });
-    /*	LazerBeams
-    ---------------------------*/
-    _.remove(world.beams, { active: false });
-    _.each(world.beams, function (beam) {
-        beam.applyMomentum();
-        beam.life--;
-        if (beam.life < 0) {
-            beam.active = false;
-        }
-    });
+    // Server Game logic -- NOT rendering
+    world.step();
 }, 60 / 1000);
 var gp0 = new GamePad(0);
 setInterval(function () {
@@ -82,10 +62,8 @@ setInterval(function () {
         my_ship.pm.y = Math.min(max, my_ship.pm.y);
         my_ship.pm.y = Math.max(-max, my_ship.pm.y);
         my_ship.r = new Vector(gp.right_x, gp.right_y).angle() + 180;
-        if (gp.right_trigger > 0.25 && my_ship.lazer_cannon_cooldown === 0) {
-            world.beams.push(new LazerBeam(my_ship));
-            my_ship.lazer_cannon_cooldown = Ship.lazer_cannon_cooldown;
-            console.log('Player 1 fire!');
+        if (gp.right_trigger > 0.25) {
+            my_ship.fire();
         }
     })(gp0);
     /*	Player 2
@@ -105,10 +83,11 @@ setInterval(function () {
         if (button.d) {
             my_ship.pm.x += pm_ratio;
         }
-        if (button.sp && my_ship.lazer_cannon_cooldown === 0) {
-            world.beams.push(new LazerBeam(my_ship));
-            my_ship.lazer_cannon_cooldown = Ship.lazer_cannon_cooldown;
-            console.log('Player 2 fire!');
+        if (button.sp) {
+            var did_fire = my_ship.fire();
+            if (did_fire) {
+                console.log('Player 2 fire!');
+            }
         }
         var arrow_val = (button.up ? '1' : '0') +
             (button.rt ? '1' : '0') +
@@ -138,6 +117,11 @@ function step() {
     ---------------------------*/
     _.each(world.beams, function (beam) {
         render_handlers.beam(ctx, beam);
+    });
+    /*	Asteroids
+    ---------------------------*/
+    _.each(world.asteroids, function (asteroid) {
+        render_handlers.asteroid(ctx, asteroid);
     });
     window.requestAnimationFrame(step);
 }

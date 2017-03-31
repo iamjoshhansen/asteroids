@@ -1,19 +1,50 @@
 var Thing = (function () {
-    function Thing(p, v) {
-        this.p = p;
-        this.pm = v;
-        this.r = 0;
-        this.rm = 0;
+    function Thing(world, position, pos_momentum, rotation, rotation_momentum) {
+        this.world = world;
+        this.p = position;
+        this.pm = pos_momentum;
+        this.r = rotation || 0;
+        this.rm = rotation_momentum || 0;
+        this.position_drag = 1;
+        this.rotation_drag = 1;
+        this.is_active = true;
     }
     Thing.prototype.applyMomentum = function () {
         this.p.add(this.pm);
         this.r += this.rm;
     };
-    Thing.prototype.applyPositionDrag = function (amount) {
-        this.pm.multiply(amount);
+    Thing.prototype.step = function () {
+        this.applyMomentum();
+        this.applyPositionDrag();
+        this.applyRotationDrag();
+        this.applyBoundingBoxRepeat();
     };
-    Thing.prototype.applyRotationalDrag = function (amount) {
-        this.rm *= amount;
+    Thing.prototype.die = function () {
+        this.is_active = false;
+    };
+    Thing.prototype.applyPositionDrag = function () {
+        this.pm.multiply(this.position_drag);
+    };
+    Thing.prototype.applyRotationDrag = function () {
+        this.rm *= this.rotation_drag;
+    };
+    Thing.prototype.applyBoundingBoxRepeat = function () {
+        var box = this.world.box, width = box.width(), height = box.height();
+        if (width < 0 || height < 0) {
+            throw new Error("Invalid bounding box: [" + box.p1.x + "," + box.p1.y + "] to [" + box.p2.x + "," + box.p2.y + "]");
+        }
+        while (this.p.x < box.p1.x) {
+            this.p.x += width;
+        }
+        while (this.p.x > box.p2.x) {
+            this.p.x -= width;
+        }
+        while (this.p.y < box.p1.y) {
+            this.p.y += height;
+        }
+        while (this.p.y > box.p2.y) {
+            this.p.y -= height;
+        }
     };
     return Thing;
 }());

@@ -26,11 +26,13 @@ class Point {
 	add (v:Vector) {
 		let p = Point.add(this, v);
 		this.moveTo(p);
+		return this;
 	}
 
 	moveTo (p:Point) {
 		this.x = p.x;
 		this.y = p.y;
+		return this;
 	}
 
 	moveToward (p:Point, s:number) {
@@ -49,6 +51,7 @@ class Point {
 		} else {
 			console.log(' ! moving toward same point');
 		}
+		return this;
 	}
 
 }

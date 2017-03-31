@@ -10,12 +10,27 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Ship = (function (_super) {
     __extends(Ship, _super);
-    function Ship(p) {
-        var _this = _super.call(this, new Point(p.x, p.y), new Vector(0, 0)) || this;
-        _this.active = true;
+    function Ship(world, position) {
+        var _this = _super.call(this, world, new Point(position.x, position.y), new Vector(0, 0)) || this;
+        _this.position_drag = 0.995;
+        _this.rotation_drag = 0.999;
         _this.lazer_cannon_cooldown = 0;
         return _this;
     }
+    Ship.prototype.step = function () {
+        _super.prototype.step.call(this);
+        if (this.lazer_cannon_cooldown > 0) {
+            this.lazer_cannon_cooldown--;
+        }
+    };
+    Ship.prototype.fire = function () {
+        if (this.lazer_cannon_cooldown === 0) {
+            this.world.beams.push(new LazerBeam(this));
+            this.lazer_cannon_cooldown = Ship.lazer_cannon_cooldown;
+            return true;
+        }
+        return false;
+    };
     return Ship;
 }(Thing));
 Ship.lazer_cannon_distance = 50;

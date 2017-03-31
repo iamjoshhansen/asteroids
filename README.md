@@ -1,4 +1,4 @@
 # Asteroids
 
-_Authors: Joshua Hansen, and Steve Black_
+> Authors: Joshua Hansen, and Steve Black
 

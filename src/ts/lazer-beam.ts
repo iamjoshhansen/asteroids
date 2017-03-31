@@ -1,6 +1,5 @@
 class LazerBeam extends Thing {
 
-	active:boolean;
 	life:number;
 
 	constructor (ship:Ship) {
@@ -13,12 +12,22 @@ class LazerBeam extends Thing {
 		let p = new Point(ship.p.x, ship.p.y);
 		p.add(starting_offset_vector);
 
-		super(p, v);
+		super(ship.world, p, v);
 
 		this.r = ship.r;
 
 		this.life = LazerBeam.lifespan;
-		this.active = true;
+	}
+
+	step () {
+		super.step();
+
+		//console.log(`Lazer has lived life ${this.life} : ${this.is_active}`);
+
+		this.life--;
+		if (this.life < 0) {
+			this.die();
+		}
 	}
 
 	static lifespan:number = 200;

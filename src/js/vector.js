@@ -24,13 +24,21 @@ var Vector = (function (_super) {
     Vector.prototype.multiply = function (amount) {
         this.x *= amount;
         this.y *= amount;
+        return this;
     };
     Vector.prototype.add = function (v) {
         var p = Vector.add(this, v);
         this.moveTo(p);
+        return this;
+    };
+    Vector.prototype.rotate = function (degrees) {
+        var new_angle = Rotation.getNormalizedVector(degrees + this.angle() + 180); // why +180 again?? why?1?
+        new_angle.multiply(this.magnitude());
+        this.moveTo(new_angle);
+        return this;
     };
     Vector.prototype.angle = function () {
-        return Math.atan2(this.y, this.x) * 180 / Math.PI + 180;
+        return Math.atan2(this.y, this.x) * (180 / Math.PI) + 180;
     };
     return Vector;
 }(Point));

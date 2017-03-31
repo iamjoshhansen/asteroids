@@ -29,7 +29,7 @@ class GamePad {
 
 	constructor (index:number) {
 		this.index = index;
-		
+
 		// buttons
 		this.a = false;
 		this.b = false;
@@ -80,12 +80,12 @@ class GamePad {
 		this.dp_right = gp.buttons[i++].pressed;
 		this.home = gp.buttons[i++].pressed;
 
-		
+		i = 0;
 		// axes
-		this.left_x = gp.axes[0];
-		this.left_y = gp.axes[1];
-		this.right_x = gp.axes[2];
-		this.right_y = gp.axes[3];
+		this.left_x = gp.axes[i++];
+		this.left_y = gp.axes[i++];
+		this.right_x = gp.axes[i++];
+		this.right_y = gp.axes[i++];
 	}
 
 }
