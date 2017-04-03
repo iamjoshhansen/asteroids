@@ -1,3 +1,17 @@
+import * as _ from "lodash";
+import { World } from './components/world';
+import { render_handlers } from './components/render-handlers';
+
+
+let player_count:number = _.filter(navigator.getGamepads()).length;
+console.log('player_count: ', player_count);
+
+let world = new World(player_count, window.innerWidth*2, window.innerHeight*2, 10);
+
+Object.defineProperty(window, 'world', {
+	value: world
+});
+
 let cnv = <HTMLCanvasElement> document.getElementById('canvas');
 
 let w:number = window.innerWidth,
@@ -11,8 +25,7 @@ cnv.setAttribute('height', (h*2) + 'px');
 
 let ctx: CanvasRenderingContext2D = cnv.getContext('2d');
 
-
-let button = {
+let button: { [key:string]: boolean; } = {
 		w: false,
 		a: false,
 		s: false,
@@ -24,8 +37,7 @@ let button = {
 		sp: false
 	};
 
-
-let button_map = {
+let button_map: { [key:number]: string; } = {
 		87: 'w',
 		65: 'a',
 		83: 's',
@@ -37,17 +49,25 @@ let button_map = {
 		37: 'lt'
 	};
 
+
+let test:string =
+	`<div id="foo">
+		bar's ${button.lt} message
+	</div>`;
+
+console.log('test: ', test);
+
 $(window)
-	.on('keydown', function (ev) {
-		let kc = ev.keyCode;
+	.on('keydown', function (ev:JQueryEventObject) {
+		let kc:number = ev.keyCode;
 		//console.log(kc);
-		
+
 		if (kc in button_map) {
 			button[button_map[kc]] = true;
 		}
 	})
-	.on('keyup', function (ev) {
-		let kc = ev.keyCode;
+	.on('keyup', function (ev:JQueryEventObject) {
+		let kc:number = ev.keyCode;
 		if (kc in button_map) {
 			button[button_map[kc]] = false;
 		}

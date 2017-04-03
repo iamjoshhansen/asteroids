@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es5",
+		"noImplicitAny": false,
+		"outDir": "./src/js/",
+		"sourceMap": true
+	},
+	"files": [
+		"./src/ts/point.ts",
+		"./src/ts/vector.ts",
+		"./src/ts/bounding-box.ts",
+		"./src/ts/rotation.ts",
+		"./src/ts/thing.ts",
+		"./src/ts/ship.ts",
+		"./src/ts/asteroid.ts",
+		"./src/ts/lazer-beam.ts",
+		"./src/ts/gamepad.ts",
+		"./src/ts/world.ts",
+		"./src/ts/asteroids.ts",
+		"./src/ts/render-handlers.ts",
+		"./src/ts/animation.ts"
+	]
+}

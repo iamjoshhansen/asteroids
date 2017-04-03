@@ -1,4 +1,10 @@
-class Asteroid extends Thing {
+import * as _ from "lodash";
+import { World } from './world';
+import { Thing } from './thing';
+import { Point } from './point';
+import { Vector } from './vector';
+
+export class Asteroid extends Thing {
 
 	active:boolean;
 	size:number;

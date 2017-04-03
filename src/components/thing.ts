@@ -1,10 +1,14 @@
-class Thing {
-	
+import { World } from './world';
+import { Point } from './point';
+import { Vector } from './vector';
+
+export class Thing {
+
 	world:World;
 	p:Point;
 	pm:Vector;
 	is_active:boolean;
-	
+
 	r:number;
 	rm:number;
 

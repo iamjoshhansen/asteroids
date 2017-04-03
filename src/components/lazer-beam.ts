@@ -1,4 +1,10 @@
-class LazerBeam extends Thing {
+import { Thing } from './thing';
+import { Point } from './point';
+import { Vector } from './vector';
+import { Ship } from './ship';
+import { Rotation } from './rotation';
+
+export class LazerBeam extends Thing {
 
 	life:number;
 

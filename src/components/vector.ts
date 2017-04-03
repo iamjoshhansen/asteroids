@@ -1,4 +1,7 @@
-class Vector extends Point {
+import { Point } from './point';
+import { Rotation } from './rotation';
+
+export class Vector extends Point {
 
 	constructor (x:number, y:number) {
 		super(x,y);

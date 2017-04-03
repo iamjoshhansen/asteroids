@@ -1,4 +1,4 @@
-class GamePad {
+export class GamePad {
 	
 	index:number;
 

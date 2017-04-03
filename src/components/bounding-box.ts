@@ -1,4 +1,6 @@
-class BoundingBox {
+import { Point } from './point';
+
+export class BoundingBox {
 	
 	p1:Point;
 	p2:Point;

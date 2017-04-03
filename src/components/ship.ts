@@ -1,4 +1,12 @@
-class Ship extends Thing {
+import { Thing } from './thing';
+import { Vector } from './vector';
+import { Point } from './point';
+import { World } from './world';
+import { GamePad } from './gamepad';
+import { Rotation } from './rotation';
+import { LazerBeam } from './lazer-beam';
+
+export class Ship extends Thing {
 
 	lazer_cannon_cooldown:number;
 	thrust:number;

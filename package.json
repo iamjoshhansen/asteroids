@@ -1,0 +1,29 @@
+{
+  "name": "asteroids",
+  "version": "1.0.0",
+  "author": "Joshua Hansen, Steve Black",
+  "description": "",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jquery": "^2.0.41",
+    "@types/lodash": "^4.14.61",
+    "extract-text-webpack-plugin": "^0.8.2",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-notify": "^0.4.1",
+    "grunt-webpack": "^1.0.14",
+    "html-loader": "^0.4.0",
+    "load-grunt-config": "^0.17.1",
+    "load-grunt-tasks": "^3.1.0",
+    "time-grunt": "^1.4.0",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.2.2",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "1.14.0"
+  },
+  "scripts": {
+    "build": "webpack"
+  }
+}

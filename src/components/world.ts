@@ -1,4 +1,15 @@
-class World {
+import * as _ from "lodash";
+
+import { Ship } from './ship';
+import { Asteroid } from './asteroid';
+import { LazerBeam } from './lazer-beam';
+import { BoundingBox } from './bounding-box'
+import { Point } from './point';
+import { Vector } from './vector';
+import { Thing } from './thing';
+import { Rotation } from './rotation';
+
+export class World {
 	
 	ships:Ship[];
 	asteroids:Asteroid[];
@@ -40,7 +51,7 @@ class World {
 				
 				this.asteroids.push(asteroid);
 			}
-			console.log('Asteroids: ' + _.padLeft('', asteroids, '.'));
+			console.log('Asteroids: ' + _.padStart('', asteroids, '.'));
 			console.groupEnd();
 	}
 

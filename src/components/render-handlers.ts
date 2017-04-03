@@ -1,5 +1,10 @@
-var render_handlers = {
-		
+import { Thing } from './thing';
+import { Ship } from './ship';
+import { LazerBeam } from './lazer-beam';
+import { Asteroid } from './asteroid';
+
+export let render_handlers: {[key:string]:any;} = {
+
 		ship: function (ctx:CanvasRenderingContext2D, ship:Ship) {
 			ctx.save();
 			ctx.translate(ship.p.x, ship.p.y);

@@ -1,4 +1,6 @@
-class Rotation {
+import { Vector } from './vector';
+
+export class Rotation {
 
 	angle: number;
 
