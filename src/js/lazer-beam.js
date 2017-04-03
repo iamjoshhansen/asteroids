@@ -29,9 +29,10 @@ var LazerBeam = (function (_super) {
         if (this.life < 0) {
             this.die();
         }
+        return this;
     };
     return LazerBeam;
 }(Thing));
-LazerBeam.lifespan = 200;
+LazerBeam.lifespan = 400;
 LazerBeam.speed = 5;
 //# sourceMappingURL=lazer-beam.js.map

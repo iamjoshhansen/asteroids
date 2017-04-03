@@ -27,31 +27,34 @@ var GamePad = (function () {
     }
     GamePad.prototype.ping = function () {
         var gp = navigator.getGamepads()[this.index];
-        var i = 0;
-        // buttons
-        this.a = gp.buttons[i++].pressed;
-        this.b = gp.buttons[i++].pressed;
-        this.x = gp.buttons[i++].pressed;
-        this.y = gp.buttons[i++].pressed;
-        this.bumper_left = gp.buttons[i++].pressed;
-        this.bumper_right = gp.buttons[i++].pressed;
-        this.left_trigger = gp.buttons[i++].value;
-        this.right_trigger = gp.buttons[i++].value;
-        this.select = gp.buttons[i++].pressed;
-        this.start = gp.buttons[i++].pressed;
-        this.stick_left = gp.buttons[i++].pressed;
-        this.stick_right = gp.buttons[i++].pressed;
-        this.dp_up = gp.buttons[i++].pressed;
-        this.dp_down = gp.buttons[i++].pressed;
-        this.dp_left = gp.buttons[i++].pressed;
-        this.dp_right = gp.buttons[i++].pressed;
-        this.home = gp.buttons[i++].pressed;
-        i = 0;
-        // axes
-        this.left_x = gp.axes[i++];
-        this.left_y = gp.axes[i++];
-        this.right_x = gp.axes[i++];
-        this.right_y = gp.axes[i++];
+        if (gp) {
+            var i = 0;
+            // buttons
+            this.a = gp.buttons[i++].pressed;
+            this.b = gp.buttons[i++].pressed;
+            this.x = gp.buttons[i++].pressed;
+            this.y = gp.buttons[i++].pressed;
+            this.bumper_left = gp.buttons[i++].pressed;
+            this.bumper_right = gp.buttons[i++].pressed;
+            this.left_trigger = gp.buttons[i++].value;
+            this.right_trigger = gp.buttons[i++].value;
+            this.select = gp.buttons[i++].pressed;
+            this.start = gp.buttons[i++].pressed;
+            this.stick_left = gp.buttons[i++].pressed;
+            this.stick_right = gp.buttons[i++].pressed;
+            this.dp_up = gp.buttons[i++].pressed;
+            this.dp_down = gp.buttons[i++].pressed;
+            this.dp_left = gp.buttons[i++].pressed;
+            this.dp_right = gp.buttons[i++].pressed;
+            this.home = gp.buttons[i++].pressed;
+            i = 0;
+            // axes
+            this.left_x = gp.axes[i++];
+            this.left_y = gp.axes[i++];
+            this.right_x = gp.axes[i++];
+            this.right_y = gp.axes[i++];
+        }
+        return !!gp;
     };
     return GamePad;
 }());

@@ -27,6 +27,8 @@ class Thing {
 	applyMomentum () {
 		this.p.add(this.pm);
 		this.r += this.rm;
+
+		return this;
 	}
 
 	step () {
@@ -34,18 +36,26 @@ class Thing {
 		this.applyPositionDrag();
 		this.applyRotationDrag();
 		this.applyBoundingBoxRepeat();
+
+		return this;
 	}
 
 	die () {
 		this.is_active = false;
+		
+		return this;
 	}
 
 	applyPositionDrag () {
 		this.pm.multiply(this.position_drag);
+
+		return this;
 	}
 
 	applyRotationDrag () {
 		this.rm *= this.rotation_drag;
+
+		return this;
 	}
 
 	applyBoundingBoxRepeat () {
@@ -72,6 +82,8 @@ class Thing {
 		while (this.p.y > box.p2.y) {
 			this.p.y -= height;
 		}
+
+		return this;
 	}
 
 }

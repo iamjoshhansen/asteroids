@@ -57,35 +57,40 @@ class GamePad {
 	}
 
 	ping () {
-		var gp = navigator.getGamepads()[this.index];
+		let gp:Gamepad = navigator.getGamepads()[this.index];
+		
+		if (gp) {
 
-		let i = 0;
+			let i = 0;
 
-		// buttons
-		this.a = gp.buttons[i++].pressed;
-		this.b = gp.buttons[i++].pressed;
-		this.x = gp.buttons[i++].pressed;
-		this.y = gp.buttons[i++].pressed;
-		this.bumper_left = gp.buttons[i++].pressed;
-		this.bumper_right = gp.buttons[i++].pressed;
-		this.left_trigger = gp.buttons[i++].value;
-		this.right_trigger = gp.buttons[i++].value;
-		this.select = gp.buttons[i++].pressed;
-		this.start = gp.buttons[i++].pressed;
-		this.stick_left = gp.buttons[i++].pressed;
-		this.stick_right = gp.buttons[i++].pressed;
-		this.dp_up = gp.buttons[i++].pressed;
-		this.dp_down = gp.buttons[i++].pressed;
-		this.dp_left = gp.buttons[i++].pressed;
-		this.dp_right = gp.buttons[i++].pressed;
-		this.home = gp.buttons[i++].pressed;
+			// buttons
+			this.a = gp.buttons[i++].pressed;
+			this.b = gp.buttons[i++].pressed;
+			this.x = gp.buttons[i++].pressed;
+			this.y = gp.buttons[i++].pressed;
+			this.bumper_left = gp.buttons[i++].pressed;
+			this.bumper_right = gp.buttons[i++].pressed;
+			this.left_trigger = gp.buttons[i++].value;
+			this.right_trigger = gp.buttons[i++].value;
+			this.select = gp.buttons[i++].pressed;
+			this.start = gp.buttons[i++].pressed;
+			this.stick_left = gp.buttons[i++].pressed;
+			this.stick_right = gp.buttons[i++].pressed;
+			this.dp_up = gp.buttons[i++].pressed;
+			this.dp_down = gp.buttons[i++].pressed;
+			this.dp_left = gp.buttons[i++].pressed;
+			this.dp_right = gp.buttons[i++].pressed;
+			this.home = gp.buttons[i++].pressed;
 
-		i = 0;
-		// axes
-		this.left_x = gp.axes[i++];
-		this.left_y = gp.axes[i++];
-		this.right_x = gp.axes[i++];
-		this.right_y = gp.axes[i++];
+			i = 0;
+			// axes
+			this.left_x = gp.axes[i++];
+			this.left_y = gp.axes[i++];
+			this.right_x = gp.axes[i++];
+			this.right_y = gp.axes[i++];
+		}
+
+		return !! gp;
 	}
 
 }

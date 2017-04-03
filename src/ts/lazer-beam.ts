@@ -28,9 +28,11 @@ class LazerBeam extends Thing {
 		if (this.life < 0) {
 			this.die();
 		}
+
+		return this;
 	}
 
-	static lifespan:number = 200;
+	static lifespan:number = 400;
 	static speed:number = 5;
 
 }

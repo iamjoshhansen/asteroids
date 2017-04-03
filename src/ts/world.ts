@@ -12,30 +12,44 @@ class World {
 		this.asteroids = [];
 		this.beams = [];
 
-		for (var i = 0; i < players; i++) {
-			this.addShip(new Point((i+1) * window.innerWidth / 5, (i+1) * window.innerHeight / 5));
-		}
 
-		for (var i = 0; i < asteroids; i++) {
-			let starting_point = new Point(this.ships[0].p.x, this.ships[0].p.y),
-				random_offset_vector = Rotation.getNormalizedVector(Math.random() * 360),
-				random_movement_vector = Rotation.getNormalizedVector(Math.random() * 360);
-			
-			random_offset_vector.multiply(_.random(100, 300, true));
-			random_movement_vector.multiply(_.random(1, 3, true));
-			starting_point.add(random_offset_vector);
-			
-			let asteroid:Asteroid = new Asteroid(this, starting_point, random_movement_vector, _.random(5, 20)*2);
-			
-			this.asteroids.push(asteroid);
-		}
+		/*	Ships
+		------------------------------------------*/
+			console.group('Generating Ships');
+			for (var i = 0; i < players; i++) {
+				let ship:Ship = this.addShip(new Point(window.innerWidth + _.random(-window.innerWidth,window.innerWidth) / 5, window.innerHeight + _.random(-window.innerHeight,window.innerHeight) / 5));
+				ship.bindToGamepad(i);
+				console.log('Added `' + ship.name + '`');
+			}
+			console.groupEnd();
+
+
+		/*	Asteroids
+		------------------------------------------*/
+			console.group('Generating Asteroids');
+			for (var i = 0; i < asteroids; i++) {
+				let starting_point = new Point(this.ships[0].p.x, this.ships[0].p.y),
+					random_offset_vector = Rotation.getNormalizedVector(Math.random() * 360),
+					random_movement_vector = Rotation.getNormalizedVector(Math.random() * 360);
+				
+				random_offset_vector.multiply(_.random(300, 400, true));
+				random_movement_vector.multiply(_.random(1, 2, true));
+				starting_point.add(random_offset_vector);
+				
+				let asteroid:Asteroid = new Asteroid(this, starting_point, random_movement_vector, _.random(5, 20)*2);
+				
+				this.asteroids.push(asteroid);
+			}
+			console.log('Asteroids: ' + _.padLeft('', asteroids, '.'));
+			console.groupEnd();
 	}
 
 
 	step () {
-		
+		let self = this;
+
 		/*	ships
-		---------------------------*/
+		------------------------------------------*/
 			_.remove(this.ships, {is_active:false});
 
 			_.each(this.ships, function (thing:Thing) {
@@ -43,43 +57,47 @@ class World {
 			});
 
 
+
 		/*	asteroids
-		---------------------------*/
+		------------------------------------------*/
 			_.remove(this.asteroids, {is_active:false});
 
 			_.each(this.asteroids, function (thing:Thing) {
 				thing.step();
 			});
 
+
 		/*	beams
-		---------------------------*/
+		------------------------------------------*/
 			_.remove(this.beams, {is_active:false});
 
 			_.each(this.beams, function (thing:Thing) {
 				thing.step();
 			});
 		
-		/*	Collision: Beams & Asteroids
-		---------------------------*/
-			let self = this;
-			_.each(self.asteroids, function (asteroid) {
-				_.each(self.beams, function (beam) {
 
+		/*	Collision: Beams & Asteroids
+		------------------------------------------*/
+			_.each(self.asteroids, function (asteroid:Asteroid) {
+				_.each(self.beams, function (beam) {
 					let distance:number = Point.distance(asteroid.p, beam.p);
 					if (distance < 5 + asteroid.size) {
 						beam.die();
-						if (asteroid.size > 20) {
-							let v1 = new Vector(asteroid.pm.x, asteroid.pm.y);
-							v1.rotate(10);
-							self.addAsteroid(new Point(asteroid.p.x, asteroid.p.y), v1, asteroid.size / 2);
-							
-							let v2 = new Vector(asteroid.pm.x, asteroid.pm.y);
-							v2.rotate(-10);
-							self.addAsteroid(new Point(asteroid.p.x, asteroid.p.y), v2, asteroid.size / 2);
-						}
-						asteroid.die();
+						asteroid.breakOrDie();
 					}
+				});
+			});
+		
 
+		/*	Collision: Ships and Asteroids
+		------------------------------------------*/
+			_.each(self.asteroids, function (asteroid) {
+				_.each(self.ships, function (ship) {
+					let distance:number = Point.distance(asteroid.p, ship.p);
+					if (distance < 20 + asteroid.size) {
+						ship.die();
+						asteroid.breakOrDie();
+					}
 				});
 			});
 	}

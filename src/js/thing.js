@@ -12,21 +12,26 @@ var Thing = (function () {
     Thing.prototype.applyMomentum = function () {
         this.p.add(this.pm);
         this.r += this.rm;
+        return this;
     };
     Thing.prototype.step = function () {
         this.applyMomentum();
         this.applyPositionDrag();
         this.applyRotationDrag();
         this.applyBoundingBoxRepeat();
+        return this;
     };
     Thing.prototype.die = function () {
         this.is_active = false;
+        return this;
     };
     Thing.prototype.applyPositionDrag = function () {
         this.pm.multiply(this.position_drag);
+        return this;
     };
     Thing.prototype.applyRotationDrag = function () {
         this.rm *= this.rotation_drag;
+        return this;
     };
     Thing.prototype.applyBoundingBoxRepeat = function () {
         var box = this.world.box, width = box.width(), height = box.height();
@@ -45,6 +50,7 @@ var Thing = (function () {
         while (this.p.y > box.p2.y) {
             this.p.y -= height;
         }
+        return this;
     };
     return Thing;
 }());

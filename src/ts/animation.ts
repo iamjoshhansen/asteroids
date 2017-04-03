@@ -40,11 +40,10 @@ let button_map = {
 $(window)
 	.on('keydown', function (ev) {
 		let kc = ev.keyCode;
-		console.log(kc);
+		//console.log(kc);
 		
 		if (kc in button_map) {
 			button[button_map[kc]] = true;
-			
 		}
 	})
 	.on('keyup', function (ev) {
@@ -61,92 +60,65 @@ setInterval(function () {
 }, 60 / 1000);
 
 
-let gp0 = new GamePad(0);
-
 setInterval(function () {
 
 	// Local game logic -- NOT rendering or server game logic
 
-	/*	Player 1
-	--------------------------*/
 
-		(function (gp) {
-			let my_ship = world.ships[0]; // todo: fix when it matters
-				
-			let pm_ratio = 0.05;
+	_.each(world.ships, function (ship) {
+		ship.pingControlls();
+	});
 
-			gp.ping();
+	// /*	Player 2
+	// --------------------------*/
 
-			my_ship.pm.x += gp.left_x * pm_ratio;
-			my_ship.pm.y += gp.left_y * pm_ratio;
-
-			let max = 10;
-			my_ship.pm.x = Math.min(max, my_ship.pm.x);
-			my_ship.pm.x = Math.max(-max, my_ship.pm.x);
-
-			my_ship.pm.y = Math.min(max, my_ship.pm.y);
-			my_ship.pm.y = Math.max(-max, my_ship.pm.y);
-
-			my_ship.r = new Vector(gp.right_x, gp.right_y).angle() + 180;
-
-			if (gp.right_trigger > 0.25) {
-				my_ship.fire();
-			}
-
-		})(gp0);
-
-	/*	Player 2
-	--------------------------*/
-
-		(function () {
-			let my_ship = world.ships[1]; // todo: fix when it matters
+	// 	(function (my_ship:Ship) {
 			
-			let pm_ratio = 0.01;
+	// 		if (my_ship) {
+	// 			let pm_ratio = 0.01;
 
-			if (button.w) {
-				my_ship.pm.y -= pm_ratio;
-			}
+	// 			if (button.w) {
+	// 				my_ship.pm.y -= pm_ratio;
+	// 			}
 
-			if (button.s) {
-				my_ship.pm.y += pm_ratio;
-			}
+	// 			if (button.s) {
+	// 				my_ship.pm.y += pm_ratio;
+	// 			}
 
-			if (button.a) {
-				my_ship.pm.x -= pm_ratio;
-			}
+	// 			if (button.a) {
+	// 				my_ship.pm.x -= pm_ratio;
+	// 			}
 
-			if (button.d) {
-				my_ship.pm.x += pm_ratio;
-			}
+	// 			if (button.d) {
+	// 				my_ship.pm.x += pm_ratio;
+	// 			}
 
-			if (button.sp) {
-				let did_fire:boolean = my_ship.fire();
-				if (did_fire) {
-					console.log('Player 2 fire!');
-				}
-			}
+	// 			if (button.sp) {
+	// 				let did_fire:boolean = my_ship.fire();
+	// 			}
 
 
-			var arrow_val = 
-					(button.up ? '1' : '0') + 
-					(button.rt ? '1' : '0') + 
-					(button.dn ? '1' : '0') + 
-					(button.lt ? '1' : '0');
+	// 			var arrow_val = 
+	// 					(button.up ? '1' : '0') + 
+	// 					(button.rt ? '1' : '0') + 
+	// 					(button.dn ? '1' : '0') + 
+	// 					(button.lt ? '1' : '0');
 
 
-			var direction_map = {
-					'1000': -90,
-					'0100': 0,
-					'0010': 90,
-					'0001': 180
-				};
+	// 			var direction_map = {
+	// 					'1000': -90,
+	// 					'0100': 0,
+	// 					'0010': 90,
+	// 					'0001': 180
+	// 				};
 
 
-			if (arrow_val in direction_map) {
-				var r = direction_map[arrow_val];
-				my_ship.r = r;
-			}
-		})();
+	// 			if (arrow_val in direction_map) {
+	// 				var r = direction_map[arrow_val];
+	// 				my_ship.r = r;
+	// 			}
+	// 		}
+	// 	})(world.ships[1]);
 
 
 

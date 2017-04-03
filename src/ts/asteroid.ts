@@ -9,4 +9,18 @@ class Asteroid extends Thing {
 		this.active = true;
 	}
 
+	breakOrDie () {
+		if (this.size > 20) {
+			let v1 = new Vector(this.pm.x, this.pm.y);
+			v1.rotate(10);
+			this.world.addAsteroid(new Point(this.p.x, this.p.y), v1, this.size / 2);
+			
+			let v2 = new Vector(this.pm.x, this.pm.y);
+			v2.rotate(-10);
+			this.world.addAsteroid(new Point(this.p.x, this.p.y), v2, this.size / 2);
+		}
+
+		return this.die();
+	}
+
 }
