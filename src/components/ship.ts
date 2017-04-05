@@ -28,6 +28,8 @@ export class Ship extends Thing {
 	static lazer_cannon_distance:number = 50;
 	static lazer_cannon_cooldown:number = 25;
 
+	static img_loaded:boolean = false;
+	static img:HTMLImageElement = new Image(100,100);
 
 	static gamepad_handler = {
 
@@ -150,4 +152,10 @@ export class Ship extends Thing {
 		return false;
 	}
 
+}
+
+Ship.img.src = './images/spaceship.svg';
+Ship.img.onload = function () {
+	Ship.img_loaded = true;
+	console.log('image loaded!');
 }

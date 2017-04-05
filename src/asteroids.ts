@@ -50,13 +50,6 @@ let button_map: { [key:number]: string; } = {
 	};
 
 
-let test:string =
-	`<div id="foo">
-		bar's ${button.lt} message
-	</div>`;
-
-console.log('test: ', test);
-
 $(window)
 	.on('keydown', function (ev:JQueryEventObject) {
 		let kc:number = ev.keyCode;

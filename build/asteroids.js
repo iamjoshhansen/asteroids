@@ -84,8 +84,6 @@
 	    40: 'dn',
 	    37: 'lt'
 	};
-	var test = "<div id=\"foo\">\n\t\tbar's " + button.lt + " message\n\t</div>";
-	console.log('test: ', test);
 	$(window)
 	    .on('keydown', function (ev) {
 	    var kc = ev.keyCode;
@@ -17454,6 +17452,8 @@
 	}(thing_1.Thing));
 	Ship.lazer_cannon_distance = 50;
 	Ship.lazer_cannon_cooldown = 25;
+	Ship.img_loaded = false;
+	Ship.img = new Image(100, 100);
 	Ship.gamepad_handler = {
 	    strafe: function (ship) {
 	        var pm_ratio = 0.05;
@@ -17507,6 +17507,11 @@
 	    }
 	};
 	exports.Ship = Ship;
+	Ship.img.src = './images/spaceship.svg';
+	Ship.img.onload = function () {
+	    Ship.img_loaded = true;
+	    console.log('image loaded!');
+	};
 
 
 /***/ },
@@ -17690,6 +17695,12 @@
 	    Rotation.getNormalizedVector = function (degrees) {
 	        var x = Math.cos(degrees * Math.PI / 180), y = Math.sin(degrees * Math.PI / 180);
 	        return new vector_1.Vector(x, y);
+	    };
+	    Rotation.prototype.getVector = function (magnitude) {
+	        if (magnitude === void 0) { magnitude = 1; }
+	        return Rotation
+	            .getNormalizedVector(this.angle)
+	            .multiply(magnitude);
 	    };
 	    return Rotation;
 	}());
@@ -17887,19 +17898,20 @@
 
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
+	var ship_1 = __webpack_require__(4);
 	var lazer_beam_1 = __webpack_require__(10);
 	exports.render_handlers = {
 	    ship: function (ctx, ship) {
 	        ctx.save();
 	        ctx.translate(ship.p.x, ship.p.y);
-	        var scale = 20;
+	        var scale = 25;
 	        ctx.scale(scale, scale);
 	        ctx.rotate(ship.r * Math.PI / 180);
 	        // draw below
 	        /*	Reverse Thrust :: Left
 	        ------------------------------------------*/
 	        ctx.save();
-	        ctx.translate(1, -0.4);
+	        ctx.translate(0.75, -0.4);
 	        ctx.rotate(-5 * Math.PI / 6);
 	        ctx.beginPath();
 	        ctx.moveTo(0, ship.reverse_thrust / 2);
@@ -17912,7 +17924,7 @@
 	        /*	Reverse Thrust :: Right
 	        ------------------------------------------*/
 	        ctx.save();
-	        ctx.translate(1, 0.4);
+	        ctx.translate(0.75, 0.4);
 	        ctx.rotate(11 * Math.PI / 6);
 	        ctx.beginPath();
 	        ctx.moveTo(0, ship.reverse_thrust / 2);
@@ -17924,19 +17936,29 @@
 	        ctx.restore();
 	        /*	Body
 	        ------------------------------------------*/
-	        ctx.beginPath();
-	        ctx.moveTo(2, 0);
-	        ctx.lineTo(-0.5, 1);
-	        ctx.lineTo(-0.5, -1);
-	        ctx.closePath();
-	        ctx.fillStyle = '#f9f9f9';
-	        ctx.fill();
+	        // ctx.beginPath();
+	        // ctx.moveTo(2, 0);
+	        // ctx.lineTo(-0.5, 1);
+	        // ctx.lineTo(-0.5, -1);
+	        // ctx.closePath();
+	        // ctx.fillStyle  = 'rgba(0,0,255,0.15)'; '#f9f9f9';
+	        // ctx.fill();
+	        ctx.save();
+	        ctx.scale(1 / scale, 1 / scale);
+	        ctx.scale(0.5, 0.5);
+	        ctx.translate(50, -50);
+	        ctx.rotate(Math.PI / 2);
+	        if (ship_1.Ship.img_loaded) {
+	            ctx.drawImage(ship_1.Ship.img, 0, 0);
+	        }
+	        ctx.restore();
 	        /*	Thrust
 	        ------------------------------------------*/
+	        var rocket_width = 0.1;
 	        ctx.beginPath();
-	        ctx.moveTo(-ship.thrust - 0.5, 0);
-	        ctx.lineTo(-0.5, 0.5);
-	        ctx.lineTo(-0.5, -0.5);
+	        ctx.moveTo(-ship.thrust - 1, 0);
+	        ctx.lineTo(-1, rocket_width);
+	        ctx.lineTo(-1, -rocket_width);
 	        ctx.closePath();
 	        ctx.fillStyle = '#f90';
 	        ctx.fill();

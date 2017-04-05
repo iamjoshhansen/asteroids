@@ -14,4 +14,10 @@ export class Rotation {
 		return new Vector(x, y);
 	}
 
+	getVector (magnitude:number = 1) {
+		return Rotation
+			.getNormalizedVector(this.angle)
+			.multiply(magnitude);
+	}
+
 }
