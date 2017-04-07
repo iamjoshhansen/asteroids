@@ -8,6 +8,9 @@ import ShipUI from './components/ui/ship';
 import { Asteroid } from './components/asteroid';
 import AsteroidUI from './components/ui/asteroid';
 
+import { LazerBeam } from './components/lazer-beam';
+import LazerBeamUI from './components/ui/lazer-beam';
+
 import { render_handlers } from './components/render-handlers';
 
 import ExplosionShipUI from './components/ui/explosion-ship';
@@ -168,8 +171,14 @@ function step() {
 
 	/*	LazerBeams
 	---------------------------*/
-		_.each(world.beams, function (beam) {
-			render_handlers.beam(ctx, beam);
+		_.each(world.beams, function (beam:LazerBeam) {
+			if ( ! beam.ui) {
+				beam.ui = new LazerBeamUI(beam);
+			}
+
+			beam.ui.updateAndRender(ctx);
+
+			// render_handlers.beam(ctx, beam);
 		});
 
 	/*	Asteroids

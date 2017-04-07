@@ -17,6 +17,7 @@
     "html-loader": "^0.4.0",
     "load-grunt-config": "^0.17.1",
     "load-grunt-tasks": "^3.1.0",
+    "lodash": "^4.17.4",
     "time-grunt": "^1.4.0",
     "ts-loader": "^2.0.3",
     "typescript": "^2.2.2",
