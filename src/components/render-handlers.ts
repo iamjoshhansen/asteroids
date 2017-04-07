@@ -29,7 +29,7 @@ export let render_handlers: {[key:string]:any;} = {
 				ctx.fill();
 
 				ctx.restore();
-			
+
 
 			/*	Reverse Thrust :: Right
 			------------------------------------------*/
@@ -83,7 +83,7 @@ export let render_handlers: {[key:string]:any;} = {
 				ctx.fillStyle  = '#f90';
 				ctx.fill();
 
-			
+
 			ctx.restore();
 
 			/*	Player Name
@@ -120,9 +120,25 @@ export let render_handlers: {[key:string]:any;} = {
 			ctx.rotate(asteroid.r * Math.PI / 180);
 			// draw below
 
+			// if (Asteroid.img_loaded) {
+			// 	let max_offset:number = 32,
+			// 		offset:number = asteroid.a_b ? 0 : 32,
+			// 		so:number = offset + Math.floor(asteroid.sprite_offset / 10) % 32,
+			// 		offset_x:number = (so % 8) * 128,
+			// 		offset_y:number = Math.floor(so / 8) * 128,
+			// 		size = asteroid.size;
+
+			// 	ctx.drawImage(
+			// 		Asteroid.img,
+			// 		offset_x, offset_y,
+			// 		128, 128,
+			// 		-size, -size,
+			// 		size * 2, size * 2
+			// 	);
+			// }
+
 			ctx.beginPath();
 			ctx.arc(0,0,asteroid.size, 0, Math.PI*2);
-
 			ctx.strokeStyle = '#f90';
 			ctx.fillStyle = 'rgba(200,100,0,0.25)';
 			ctx.fill();

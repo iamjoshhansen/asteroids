@@ -1,4 +1,5 @@
-import { World } from './world';
+import World from './world';
+import UI from './ui/index';
 import { Point } from './point';
 import { Vector } from './vector';
 
@@ -8,6 +9,7 @@ export class Thing {
 	p:Point;
 	pm:Vector;
 	is_active:boolean;
+	ui:UI;
 
 	r:number;
 	rm:number;
@@ -46,7 +48,7 @@ export class Thing {
 
 	die () {
 		this.is_active = false;
-		
+
 		return this;
 	}
 

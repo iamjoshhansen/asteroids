@@ -1,26 +1,26 @@
 import { Thing } from './thing';
 import { Point } from './point';
 import { Vector } from './vector';
+import World from './world';
 import { Ship } from './ship';
 import { Rotation } from './rotation';
 
 export class LazerBeam extends Thing {
 
 	life:number;
+	owner:Ship;
 
-	constructor (ship:Ship) {
-		let v = Rotation.getNormalizedVector(ship.r),
-			starting_offset_vector = new Vector(v.x, v.y);
-		
-		v.multiply(LazerBeam.speed);
-		starting_offset_vector.multiply(Ship.lazer_cannon_distance);
+	constructor (world:World, position:Point, degrees:number, owner:Ship) {
+		let pos_momentum = Rotation
+				.getNormalizedVector(degrees)
+				.multiply(LazerBeam.speed);
 
-		let p = new Point(ship.p.x, ship.p.y);
-		p.add(starting_offset_vector);
+		let pos = new Point(position.x, position.y);
 
-		super(ship.world, p, v);
+		super(world, pos, pos_momentum);
 
-		this.r = ship.r;
+		this.owner = owner;
+		this.r = pos_momentum.angle();
 
 		this.life = LazerBeam.lifespan;
 	}

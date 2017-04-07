@@ -48,10 +48,12 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var _ = __webpack_require__(1);
 	var world_1 = __webpack_require__(3);
-	var render_handlers_1 = __webpack_require__(13);
+	var ship_1 = __webpack_require__(18);
+	var asteroid_1 = __webpack_require__(19);
+	var render_handlers_1 = __webpack_require__(20);
 	var player_count = _.filter(navigator.getGamepads()).length;
 	console.log('player_count: ', player_count);
-	var world = new world_1.World(player_count, window.innerWidth * 2, window.innerHeight * 2, 10);
+	var world = new world_1.default(player_count, window.innerWidth * 2, window.innerHeight * 2, 10);
 	Object.defineProperty(window, 'world', {
 	    value: world
 	});
@@ -127,10 +129,10 @@
 	    // 			if (button.sp) {
 	    // 				let did_fire:boolean = my_ship.fire();
 	    // 			}
-	    // 			var arrow_val = 
-	    // 					(button.up ? '1' : '0') + 
-	    // 					(button.rt ? '1' : '0') + 
-	    // 					(button.dn ? '1' : '0') + 
+	    // 			var arrow_val =
+	    // 					(button.up ? '1' : '0') +
+	    // 					(button.rt ? '1' : '0') +
+	    // 					(button.dn ? '1' : '0') +
 	    // 					(button.lt ? '1' : '0');
 	    // 			var direction_map = {
 	    // 					'1000': -90,
@@ -151,7 +153,11 @@
 	    /*	Ships
 	    ---------------------------*/
 	    _.each(world.ships, function (ship) {
-	        render_handlers_1.render_handlers.ship(ctx, ship);
+	        //render_handlers.ship(ctx, ship);
+	        if (!ship.ui) {
+	            ship.ui = new ship_1.default(ship);
+	        }
+	        ship.ui.updateAndRender(ctx);
 	    });
 	    /*	LazerBeams
 	    ---------------------------*/
@@ -161,7 +167,16 @@
 	    /*	Asteroids
 	    ---------------------------*/
 	    _.each(world.asteroids, function (asteroid) {
-	        render_handlers_1.render_handlers.asteroid(ctx, asteroid);
+	        if (!asteroid.ui) {
+	            asteroid.ui = new asteroid_1.default(asteroid);
+	        }
+	        asteroid.ui.updateAndRender(ctx);
+	        //render_handlers.asteroid(ctx, asteroid);
+	    });
+	    /*	Explosions
+	    ------------------------------------------*/
+	    _.each(world.uis, function (ui) {
+	        ui.updateAndRender(ctx);
 	    });
 	    window.requestAnimationFrame(step);
 	}
@@ -17283,8 +17298,8 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var _ = __webpack_require__(1);
 	var ship_1 = __webpack_require__(4);
-	var asteroid_1 = __webpack_require__(11);
-	var bounding_box_1 = __webpack_require__(12);
+	var asteroid_1 = __webpack_require__(15);
+	var bounding_box_1 = __webpack_require__(17);
 	var point_1 = __webpack_require__(7);
 	var rotation_1 = __webpack_require__(8);
 	var World = (function () {
@@ -17293,6 +17308,7 @@
 	        this.ships = [];
 	        this.asteroids = [];
 	        this.beams = [];
+	        this.uis = [];
 	        /*	Ships
 	        ------------------------------------------*/
 	        console.group('Generating Ships');
@@ -17308,9 +17324,11 @@
 	        for (var i = 0; i < asteroids; i++) {
 	            var starting_point = new point_1.Point(this.ships[0].p.x, this.ships[0].p.y), random_offset_vector = rotation_1.Rotation.getNormalizedVector(Math.random() * 360), random_movement_vector = rotation_1.Rotation.getNormalizedVector(Math.random() * 360);
 	            random_offset_vector.multiply(_.random(300, 400, true));
-	            random_movement_vector.multiply(_.random(1, 2, true));
+	            random_movement_vector.multiply(_.random(0.5, 1, true));
+	            //random_movement_vector.multiply(0);
 	            starting_point.add(random_offset_vector);
-	            var asteroid = new asteroid_1.Asteroid(this, starting_point, random_movement_vector, _.random(5, 20) * 2);
+	            var asteroid = new asteroid_1.Asteroid(this, starting_point, random_movement_vector, _.random(20, 100));
+	            asteroid.rm = _.random(-0.25, 0.25, true);
 	            this.asteroids.push(asteroid);
 	        }
 	        console.log('Asteroids: ' + _.padStart('', asteroids, '.'));
@@ -17327,8 +17345,16 @@
 	        /*	asteroids
 	        ------------------------------------------*/
 	        _.remove(this.asteroids, { is_active: false });
-	        _.each(this.asteroids, function (thing) {
-	            thing.step();
+	        if (this.asteroids.length < 20 && _.random(0, 100) === 0) {
+	            var starting_point = new point_1.Point(this.ships[0].p.x, this.ships[0].p.y), random_offset_vector = rotation_1.Rotation.getNormalizedVector(Math.random() * 360), movement_vector = rotation_1.Rotation.getNormalizedVector(Math.random() * 360);
+	            random_offset_vector.multiply(_.random(500, 600));
+	            movement_vector.multiply(_.random(0.5, 1, true));
+	            //movement_vector.multiply(0);
+	            starting_point.add(random_offset_vector);
+	            this.addAsteroid(starting_point, movement_vector, _.random(50, 100));
+	        }
+	        _.each(this.asteroids, function (asteroid) {
+	            asteroid.step();
 	        });
 	        /*	beams
 	        ------------------------------------------*/
@@ -17336,6 +17362,9 @@
 	        _.each(this.beams, function (thing) {
 	            thing.step();
 	        });
+	        /*	UIs
+	        ------------------------------------------*/
+	        _.remove(this.uis, { is_active: false });
 	        /*	Collision: Beams & Asteroids
 	        ------------------------------------------*/
 	        _.each(self.asteroids, function (asteroid) {
@@ -17344,6 +17373,7 @@
 	                if (distance < 5 + asteroid.size) {
 	                    beam.die();
 	                    asteroid.breakOrDie();
+	                    beam.owner.score++;
 	                }
 	            });
 	        });
@@ -17369,7 +17399,7 @@
 	    };
 	    return World;
 	}());
-	exports.World = World;
+	exports.default = World;
 
 
 /***/ },
@@ -17394,6 +17424,7 @@
 	var gamepad_1 = __webpack_require__(9);
 	var rotation_1 = __webpack_require__(8);
 	var lazer_beam_1 = __webpack_require__(10);
+	var explosion_ship_1 = __webpack_require__(11);
 	var Ship = (function (_super) {
 	    __extends(Ship, _super);
 	    function Ship(world, position) {
@@ -17405,6 +17436,8 @@
 	        _this.thrust = 0;
 	        _this.reverse_thrust = 0;
 	        _this.name = '?';
+	        _this.score = 0;
+	        _this.weapon = 'tri-beam';
 	        return _this;
 	    }
 	    Ship.prototype.step = function () {
@@ -17426,11 +17459,47 @@
 	    };
 	    Ship.prototype.fire = function () {
 	        if (this.lazer_cannon_cooldown === 0) {
-	            this.world.beams.push(new lazer_beam_1.LazerBeam(this));
+	            switch (this.weapon) {
+	                case 'single-beam':
+	                    this.world.beams.push(new lazer_beam_1.LazerBeam(this.world, this.p, this.r, this));
+	                    break;
+	                case 'dual-beam':
+	                    (function () {
+	                        var offset_v = rotation_1.Rotation.getNormalizedVector(this.r).multiply(20);
+	                        offset_v.rotate(90);
+	                        var starting_point_a = new point_1.Point(this.p.x, this.p.y), starting_point_b = new point_1.Point(this.p.x, this.p.y);
+	                        starting_point_a.add(offset_v);
+	                        offset_v.rotate(180);
+	                        starting_point_b.add(offset_v);
+	                        this.world.beams.push(new lazer_beam_1.LazerBeam(this.world, starting_point_a, this.r, this));
+	                        this.world.beams.push(new lazer_beam_1.LazerBeam(this.world, starting_point_b, this.r, this));
+	                    }).call(this);
+	                    break;
+	                case 'tri-beam':
+	                    (function () {
+	                        this.world.beams.push(new lazer_beam_1.LazerBeam(this.world, this.p, this.r, this));
+	                        var offset_v = rotation_1.Rotation.getNormalizedVector(this.r).multiply(20);
+	                        offset_v.rotate(90);
+	                        var starting_point_a = new point_1.Point(this.p.x, this.p.y), starting_point_b = new point_1.Point(this.p.x, this.p.y);
+	                        starting_point_a.add(offset_v);
+	                        offset_v.rotate(180);
+	                        starting_point_b.add(offset_v);
+	                        var spread = 10;
+	                        this.world.beams.push(new lazer_beam_1.LazerBeam(this.world, starting_point_a, this.r + spread, this));
+	                        this.world.beams.push(new lazer_beam_1.LazerBeam(this.world, starting_point_b, this.r - spread, this));
+	                    }).call(this);
+	                    break;
+	            }
 	            this.lazer_cannon_cooldown = Ship.lazer_cannon_cooldown;
 	            return true;
 	        }
 	        return false;
+	    };
+	    Ship.prototype.die = function () {
+	        var explosion = new explosion_ship_1.default(this.p);
+	        this.world.uis.push(explosion);
+	        _super.prototype.die.call(this);
+	        return this;
 	    };
 	    Ship.prototype.bindToGamepad = function (index) {
 	        this.bound_gamepad = new gamepad_1.GamePad(index);
@@ -17450,7 +17519,7 @@
 	    };
 	    return Ship;
 	}(thing_1.Thing));
-	Ship.lazer_cannon_distance = 50;
+	Ship.lazer_cannon_distance = 30;
 	Ship.lazer_cannon_cooldown = 25;
 	Ship.img_loaded = false;
 	Ship.img = new Image(100, 100);
@@ -17510,7 +17579,7 @@
 	Ship.img.src = './images/spaceship.svg';
 	Ship.img.onload = function () {
 	    Ship.img_loaded = true;
-	    console.log('image loaded!');
+	    console.log('Ship image loaded!');
 	};
 
 
@@ -17794,20 +17863,18 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var thing_1 = __webpack_require__(5);
 	var point_1 = __webpack_require__(7);
-	var vector_1 = __webpack_require__(6);
-	var ship_1 = __webpack_require__(4);
 	var rotation_1 = __webpack_require__(8);
 	var LazerBeam = (function (_super) {
 	    __extends(LazerBeam, _super);
-	    function LazerBeam(ship) {
+	    function LazerBeam(world, position, degrees, owner) {
 	        var _this = this;
-	        var v = rotation_1.Rotation.getNormalizedVector(ship.r), starting_offset_vector = new vector_1.Vector(v.x, v.y);
-	        v.multiply(LazerBeam.speed);
-	        starting_offset_vector.multiply(ship_1.Ship.lazer_cannon_distance);
-	        var p = new point_1.Point(ship.p.x, ship.p.y);
-	        p.add(starting_offset_vector);
-	        _this = _super.call(this, ship.world, p, v) || this;
-	        _this.r = ship.r;
+	        var pos_momentum = rotation_1.Rotation
+	            .getNormalizedVector(degrees)
+	            .multiply(LazerBeam.speed);
+	        var pos = new point_1.Point(position.x, position.y);
+	        _this = _super.call(this, world, pos, pos_momentum) || this;
+	        _this.owner = owner;
+	        _this.r = pos_momentum.angle();
 	        _this.life = LazerBeam.lifespan;
 	        return _this;
 	    }
@@ -17843,15 +17910,191 @@
 	    };
 	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
+	var sprite_1 = __webpack_require__(12);
+	var rotation_1 = __webpack_require__(8);
+	var ExplosionShipUI = (function (_super) {
+	    __extends(ExplosionShipUI, _super);
+	    function ExplosionShipUI(position) {
+	        return _super.call(this, position, new rotation_1.Rotation(0), 0.5, './images/explosion-ship-sprite-fade_8_easeinout.png', 2048, 1024, 8, 4) || this;
+	    }
+	    ExplosionShipUI.prototype.updateAndRender = function (ctx) {
+	        this.frame++;
+	        if (this.frame == this.maxFrame()) {
+	            this.is_active = false;
+	        }
+	        if (this.is_active) {
+	            _super.prototype.updateAndRender.call(this, ctx);
+	        }
+	        return this;
+	    };
+	    return ExplosionShipUI;
+	}(sprite_1.default));
+	exports.default = ExplosionShipUI;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var image_1 = __webpack_require__(13);
+	var SpriteUI = (function (_super) {
+	    __extends(SpriteUI, _super);
+	    function SpriteUI(position, rotation, scale, src, width, height, cols, rows) {
+	        var _this = _super.call(this, position, rotation, scale, src, width, height) || this;
+	        _this.frame = 0;
+	        _this.rows = rows;
+	        _this.cols = cols;
+	        return _this;
+	    }
+	    SpriteUI.prototype.render = function (ctx) {
+	        ctx.save();
+	        ctx.translate(this.p.x, this.p.y);
+	        ctx.scale(this.scale, this.scale);
+	        ctx.rotate(this.r.angle * Math.PI / 180);
+	        if (this.is_centered) {
+	            ctx.translate(-this.width / 2, -this.height / 2);
+	        }
+	        var frame_mod = Math.floor(this.frame) % this.maxFrame(), frame_width = this.width / this.cols, frame_height = this.height / this.rows, col = frame_mod % this.cols, row = Math.floor(frame_mod / this.cols);
+	        //console.log(`[${col} of ${this.cols}, ${row} of ${this.rows}]`);
+	        ctx.drawImage(this.img, // img
+	        col * frame_width, row * frame_height, // sx, sy
+	        frame_width, frame_height, // sw, sh
+	        -frame_width, -frame_height, // dx, dy
+	        frame_width * 2, frame_height * 2 // dw, dh
+	        );
+	        ctx.restore();
+	        return this;
+	    };
+	    SpriteUI.prototype.updateAndRender = function (ctx) {
+	        _super.prototype.updateAndRender.call(this, ctx);
+	        return this;
+	    };
+	    SpriteUI.prototype.maxFrame = function () {
+	        return (this.rows * this.cols);
+	    };
+	    return SpriteUI;
+	}(image_1.default));
+	exports.default = SpriteUI;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var index_1 = __webpack_require__(14);
+	var ImageUI = (function (_super) {
+	    __extends(ImageUI, _super);
+	    function ImageUI(position, rotation, scale, src, width, height, is_centered) {
+	        var _this = _super.call(this, position, rotation, scale) || this;
+	        var self = _this;
+	        self.width = width;
+	        self.height = height;
+	        self.is_loaded = false;
+	        self.img = new Image(width, height);
+	        self.img.onload = function () {
+	            self.is_loaded = true;
+	        };
+	        self.img.src = src;
+	        _this.is_centered = is_centered || false;
+	        return _this;
+	    }
+	    ImageUI.prototype.render = function (ctx) {
+	        ctx.save();
+	        ctx.translate(this.p.x, this.p.y);
+	        ctx.scale(this.scale, this.scale);
+	        ctx.rotate(this.r.angle * Math.PI / 180);
+	        if (this.is_centered) {
+	            ctx.translate(-this.width / 2, -this.height / 2);
+	        }
+	        ctx.drawImage(this.img, 0, 0);
+	        ctx.restore();
+	        return this;
+	    };
+	    return ImageUI;
+	}(index_1.default));
+	exports.default = ImageUI;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var point_1 = __webpack_require__(7);
+	var rotation_1 = __webpack_require__(8);
+	var UI = (function () {
+	    function UI(position, rotation, scale) {
+	        this.p = new point_1.Point(position.x, position.y);
+	        this.r = new rotation_1.Rotation(rotation.angle);
+	        this.scale = scale;
+	        this.is_active = true;
+	    }
+	    UI.prototype.render = function (ctx) {
+	        console.warn('UI does not render anything.');
+	        return this;
+	    };
+	    UI.prototype.updateAndRender = function (ctx) {
+	        return this.render(ctx);
+	    };
+	    return UI;
+	}());
+	exports.default = UI;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var _ = __webpack_require__(1);
 	var thing_1 = __webpack_require__(5);
 	var point_1 = __webpack_require__(7);
 	var vector_1 = __webpack_require__(6);
+	var explosion_asteroid_1 = __webpack_require__(16);
 	var Asteroid = (function (_super) {
 	    __extends(Asteroid, _super);
 	    function Asteroid(world, position, pos_momentum, size) {
 	        var _this = _super.call(this, world, position, pos_momentum) || this;
 	        _this.size = size;
 	        _this.active = true;
+	        _this.sprite_offset = _.random(0, Asteroid.sprite_count - 1);
+	        _this.a_b = Math.random() > 0.5;
 	        return _this;
 	    }
 	    Asteroid.prototype.breakOrDie = function () {
@@ -17863,15 +18106,75 @@
 	            v2.rotate(-10);
 	            this.world.addAsteroid(new point_1.Point(this.p.x, this.p.y), v2, this.size / 2);
 	        }
+	        else {
+	            var explosion = new explosion_asteroid_1.default(this.p);
+	            this.world.uis.push(explosion);
+	        }
 	        return this.die();
+	    };
+	    Asteroid.prototype.die = function () {
+	        _super.prototype.die.call(this);
+	        return this;
+	    };
+	    Asteroid.prototype.step = function () {
+	        _super.prototype.step.call(this);
+	        //this.sprite_offset = (this.sprite_offset + 1) % Asteroid.sprite_count;
+	        this.sprite_offset++;
+	        return this;
 	    };
 	    return Asteroid;
 	}(thing_1.Thing));
+	Asteroid.sprite_count = 64;
+	Asteroid.img = new Image(1024, 1024);
+	Asteroid.img_loaded = false;
 	exports.Asteroid = Asteroid;
+	Asteroid.img.src = './images/asteroid-sprite.png';
+	Asteroid.img.onload = function () {
+	    Asteroid.img_loaded = true;
+	    console.log('Asteroid image loaded!');
+	};
 
 
 /***/ },
-/* 12 */
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var sprite_1 = __webpack_require__(12);
+	var rotation_1 = __webpack_require__(8);
+	var ExplosionAsteroidUI = (function (_super) {
+	    __extends(ExplosionAsteroidUI, _super);
+	    function ExplosionAsteroidUI(position) {
+	        return _super.call(this, position, new rotation_1.Rotation(0), 1, './images/explosion-cartoon-sprite_590x118.png', 590, 118, 5, 1) || this;
+	    }
+	    ExplosionAsteroidUI.prototype.updateAndRender = function (ctx) {
+	        this.frame += 0.2;
+	        if (this.frame > this.maxFrame()) {
+	            this.is_active = false;
+	        }
+	        if (this.is_active) {
+	            _super.prototype.updateAndRender.call(this, ctx);
+	        }
+	        return this;
+	    };
+	    return ExplosionAsteroidUI;
+	}(sprite_1.default));
+	exports.default = ExplosionAsteroidUI;
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -17893,7 +18196,133 @@
 
 
 /***/ },
-/* 13 */
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var image_1 = __webpack_require__(13);
+	var rotation_1 = __webpack_require__(8);
+	var ShipUI = (function (_super) {
+	    __extends(ShipUI, _super);
+	    function ShipUI(ship) {
+	        var _this = _super.call(this, ship.p, new rotation_1.Rotation(ship.r), 0.5, './images/spaceship.svg', 100, 100, true) || this;
+	        _this.ship = ship;
+	        return _this;
+	    }
+	    ShipUI.prototype.render = function (ctx) {
+	        _super.prototype.render.call(this, ctx);
+	        ctx.save();
+	        ctx.translate(this.ship.p.x, this.ship.p.y);
+	        ctx.fillStyle = '#999';
+	        ctx.font = '24px "Exo 2"';
+	        /*	Name & Score
+	        ------------------------------------------*/
+	        var left = 75 * this.scale;
+	        ctx.fillText(this.ship.name, left, 0);
+	        ctx.fillText(this.ship.score.toString(), left, 25);
+	        ctx.restore();
+	        /*	Thrust
+	        ------------------------------------------*/
+	        ctx.save();
+	        ctx.scale(25, 25);
+	        var rocket_width = 0.1;
+	        ctx.beginPath();
+	        ctx.moveTo(-this.ship.thrust - 1, 0);
+	        ctx.lineTo(-1, rocket_width);
+	        ctx.lineTo(-1, -rocket_width);
+	        ctx.closePath();
+	        ctx.fillStyle = '#f90';
+	        ctx.fill();
+	        ctx.restore();
+	        /*	Reverse Thrust :: Left
+	        ------------------------------------------*/
+	        ctx.save();
+	        ctx.translate(0.75, -0.4);
+	        ctx.rotate(-5 * Math.PI / 6);
+	        ctx.beginPath();
+	        ctx.moveTo(0, this.ship.reverse_thrust / 2);
+	        ctx.lineTo(-0.25, 0);
+	        ctx.lineTo(0.25, 0);
+	        ctx.closePath();
+	        ctx.fillStyle = '#09f';
+	        ctx.fill();
+	        ctx.restore();
+	        /*	Reverse Thrust :: Right
+	        ------------------------------------------*/
+	        ctx.save();
+	        ctx.translate(0.75, 0.4);
+	        ctx.rotate(11 * Math.PI / 6);
+	        ctx.beginPath();
+	        ctx.moveTo(0, this.ship.reverse_thrust / 2);
+	        ctx.lineTo(-0.25, 0);
+	        ctx.lineTo(0.25, 0);
+	        ctx.closePath();
+	        ctx.fillStyle = '#09f';
+	        ctx.fill();
+	        ctx.restore();
+	        return this;
+	    };
+	    ShipUI.prototype.updateAndRender = function (ctx) {
+	        this.p.moveTo(this.ship.p);
+	        this.r.angle = this.ship.r + 90;
+	        return this.render(ctx);
+	    };
+	    return ShipUI;
+	}(image_1.default));
+	exports.default = ShipUI;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var _ = __webpack_require__(1);
+	var sprite_1 = __webpack_require__(12);
+	var rotation_1 = __webpack_require__(8);
+	var AsteroidUI = (function (_super) {
+	    __extends(AsteroidUI, _super);
+	    function AsteroidUI(asteroid) {
+	        var _this = _super.call(this, asteroid.p, new rotation_1.Rotation(asteroid.r), 1, './images/asteroid-' + _.random(1, 2) + '-sprite.png', 1024, 512, 8, 4) || this;
+	        _this.asteroid = asteroid;
+	        return _this;
+	    }
+	    AsteroidUI.prototype.updateAndRender = function (ctx) {
+	        this.scale = this.asteroid.size / 128;
+	        this.p.moveTo(this.asteroid.p);
+	        this.r.angle = this.asteroid.r;
+	        this.frame += 0.5;
+	        return _super.prototype.updateAndRender.call(this, ctx);
+	    };
+	    return AsteroidUI;
+	}(sprite_1.default));
+	exports.default = AsteroidUI;
+
+
+/***/ },
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -17990,6 +18419,21 @@
 	        ctx.translate(asteroid.p.x, asteroid.p.y);
 	        ctx.rotate(asteroid.r * Math.PI / 180);
 	        // draw below
+	        // if (Asteroid.img_loaded) {
+	        // 	let max_offset:number = 32,
+	        // 		offset:number = asteroid.a_b ? 0 : 32,
+	        // 		so:number = offset + Math.floor(asteroid.sprite_offset / 10) % 32,
+	        // 		offset_x:number = (so % 8) * 128,
+	        // 		offset_y:number = Math.floor(so / 8) * 128,
+	        // 		size = asteroid.size;
+	        // 	ctx.drawImage(
+	        // 		Asteroid.img,
+	        // 		offset_x, offset_y,
+	        // 		128, 128,
+	        // 		-size, -size,
+	        // 		size * 2, size * 2
+	        // 	);
+	        // }
 	        ctx.beginPath();
 	        ctx.arc(0, 0, asteroid.size, 0, Math.PI * 2);
 	        ctx.strokeStyle = '#f90';

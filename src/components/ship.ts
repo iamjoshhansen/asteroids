@@ -1,10 +1,12 @@
 import { Thing } from './thing';
 import { Vector } from './vector';
 import { Point } from './point';
-import { World } from './world';
+import World from './world';
 import { GamePad } from './gamepad';
 import { Rotation } from './rotation';
 import { LazerBeam } from './lazer-beam';
+
+import ExplosionShipUI from './ui/explosion-ship';
 
 export class Ship extends Thing {
 
@@ -13,6 +15,8 @@ export class Ship extends Thing {
 	reverse_thrust:number;
 	bound_gamepad:GamePad;
 	name:string;
+	score:number;
+	weapon:string;
 
 	constructor (world:World, position:Point) {
 		super(world, new Point(position.x, position.y), new Vector(0, 0));
@@ -23,9 +27,11 @@ export class Ship extends Thing {
 		this.thrust = 0;
 		this.reverse_thrust = 0;
 		this.name = '?';
+		this.score = 0;
+		this.weapon = 'tri-beam';
 	}
 
-	static lazer_cannon_distance:number = 50;
+	static lazer_cannon_distance:number = 30;
 	static lazer_cannon_cooldown:number = 25;
 
 	static img_loaded:boolean = false;
@@ -35,7 +41,7 @@ export class Ship extends Thing {
 
 		strafe: function (ship:Ship) {
 			let pm_ratio:number = 0.05;
-			
+
 			if (Math.abs(ship.bound_gamepad.left_x) > 0.1) {
 				ship.pm.x += ship.bound_gamepad.left_x * pm_ratio;
 			}
@@ -80,7 +86,7 @@ export class Ship extends Thing {
 				// }
 				// ship.thrust = ship.bound_gamepad.right_trigger;
 				// ship.reverse_thrust = ship.bound_gamepad.left_trigger;
-			
+
 			/*	Trhusting : Left Stick
 			------------------------------------------*/
 				if (ship.bound_gamepad.right_trigger > 0.25) {
@@ -121,7 +127,54 @@ export class Ship extends Thing {
 
 	fire () {
 		if (this.lazer_cannon_cooldown === 0) {
-			this.world.beams.push(new LazerBeam(this));
+			switch (this.weapon) {
+
+				case 'single-beam':
+					this.world.beams.push(new LazerBeam(this.world, this.p, this.r, this));
+					break;
+
+				case 'dual-beam':
+					(function() {
+
+						let offset_v = Rotation.getNormalizedVector(this.r).multiply(20);
+						offset_v.rotate(90);
+
+						let starting_point_a = new Point(this.p.x, this.p.y),
+							starting_point_b = new Point(this.p.x, this.p.y);
+
+						starting_point_a.add(offset_v);
+						offset_v.rotate(180);
+						starting_point_b.add(offset_v);
+
+						this.world.beams.push(new LazerBeam(this.world, starting_point_a, this.r, this));
+						this.world.beams.push(new LazerBeam(this.world, starting_point_b, this.r, this));
+
+					}).call(this);
+					break;
+
+				case 'tri-beam':
+					(function() {
+
+						this.world.beams.push(new LazerBeam(this.world, this.p, this.r, this));
+
+						let offset_v = Rotation.getNormalizedVector(this.r).multiply(20);
+						offset_v.rotate(90);
+
+						let starting_point_a = new Point(this.p.x, this.p.y),
+							starting_point_b = new Point(this.p.x, this.p.y);
+
+						starting_point_a.add(offset_v);
+						offset_v.rotate(180);
+						starting_point_b.add(offset_v);
+
+						let spread:number = 10;
+						this.world.beams.push(new LazerBeam(this.world, starting_point_a, this.r + spread, this));
+						this.world.beams.push(new LazerBeam(this.world, starting_point_b, this.r - spread, this));
+
+					}).call(this);
+					break;
+
+			}
 			this.lazer_cannon_cooldown = Ship.lazer_cannon_cooldown;
 			return true;
 		}
@@ -129,10 +182,18 @@ export class Ship extends Thing {
 	}
 
 
+	die () {
+		let explosion:ExplosionShipUI = new ExplosionShipUI(this.p);
+		this.world.uis.push(explosion);
+		super.die();
+		return this;
+	}
+
+
 	bindToGamepad (index:number) {
 		this.bound_gamepad = new GamePad(index);
 		this.name = 'Player ' + (index+1);
-		
+
 		return this;
 	}
 
@@ -157,5 +218,5 @@ export class Ship extends Thing {
 Ship.img.src = './images/spaceship.svg';
 Ship.img.onload = function () {
 	Ship.img_loaded = true;
-	console.log('image loaded!');
+	console.log('Ship image loaded!');
 }

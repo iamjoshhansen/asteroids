@@ -8,13 +8,15 @@ import { Point } from './point';
 import { Vector } from './vector';
 import { Thing } from './thing';
 import { Rotation } from './rotation';
+import UI from './ui/index';
 
-export class World {
-	
+export default class World {
+
 	ships:Ship[];
 	asteroids:Asteroid[];
 	beams:LazerBeam[];
 	box:BoundingBox;
+	uis:Array<UI>;
 
 	constructor (players:number, width:number, height:number, asteroids:number) {
 		this.box = new BoundingBox(new Point(0,0), new Point(width,height));
@@ -22,6 +24,7 @@ export class World {
 		this.ships = [];
 		this.asteroids = [];
 		this.beams = [];
+		this.uis = [];
 
 
 		/*	Ships
@@ -42,13 +45,15 @@ export class World {
 				let starting_point = new Point(this.ships[0].p.x, this.ships[0].p.y),
 					random_offset_vector = Rotation.getNormalizedVector(Math.random() * 360),
 					random_movement_vector = Rotation.getNormalizedVector(Math.random() * 360);
-				
+
 				random_offset_vector.multiply(_.random(300, 400, true));
-				random_movement_vector.multiply(_.random(1, 2, true));
+				random_movement_vector.multiply(_.random(0.5, 1, true));
+				//random_movement_vector.multiply(0);
 				starting_point.add(random_offset_vector);
-				
-				let asteroid:Asteroid = new Asteroid(this, starting_point, random_movement_vector, _.random(5, 20)*2);
-				
+
+				let asteroid:Asteroid = new Asteroid(this, starting_point, random_movement_vector, _.random(20, 100));
+				asteroid.rm = _.random(-0.25, 0.25, true);
+
 				this.asteroids.push(asteroid);
 			}
 			console.log('Asteroids: ' + _.padStart('', asteroids, '.'));
@@ -73,8 +78,21 @@ export class World {
 		------------------------------------------*/
 			_.remove(this.asteroids, {is_active:false});
 
-			_.each(this.asteroids, function (thing:Thing) {
-				thing.step();
+			if (this.asteroids.length < 20 && _.random(0,100) === 0) {
+				let starting_point = new Point(this.ships[0].p.x, this.ships[0].p.y),
+					random_offset_vector = Rotation.getNormalizedVector(Math.random() * 360),
+					movement_vector = Rotation.getNormalizedVector(Math.random() * 360);
+
+				random_offset_vector.multiply(_.random(500, 600));
+				movement_vector.multiply(_.random(0.5, 1, true));
+				//movement_vector.multiply(0);
+				starting_point.add(random_offset_vector);
+
+				this.addAsteroid(starting_point, movement_vector, _.random(50,100));
+			}
+
+			_.each(this.asteroids, function (asteroid:Asteroid) {
+				asteroid.step();
 			});
 
 
@@ -85,7 +103,12 @@ export class World {
 			_.each(this.beams, function (thing:Thing) {
 				thing.step();
 			});
-		
+
+
+		/*	UIs
+		------------------------------------------*/
+			_.remove(this.uis, {is_active:false});
+
 
 		/*	Collision: Beams & Asteroids
 		------------------------------------------*/
@@ -95,10 +118,11 @@ export class World {
 					if (distance < 5 + asteroid.size) {
 						beam.die();
 						asteroid.breakOrDie();
+						beam.owner.score++;
 					}
 				});
 			});
-		
+
 
 		/*	Collision: Ships and Asteroids
 		------------------------------------------*/
